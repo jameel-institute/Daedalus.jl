@@ -11,8 +11,8 @@ using Test
         λ_dom = Daedalus.Helpers.dominant_eigenvalue(A)
         λ_exact = maximum(real(eigen(A).values))
 
-        @test isapprox(λ_dom, λ_exact, rtol = 1e-5)
-        @test isapprox(λ_dom, 4.0, rtol = 1e-5)
+        @test isapprox(λ_dom, λ_exact, rtol = 1.0e-5)
+        @test isapprox(λ_dom, 4.0, rtol = 1.0e-5)
     end
 
     # Test 2: Identity matrix
@@ -21,7 +21,7 @@ using Test
         A = Matrix{Float64}(I, n, n)
         λ_dom = Daedalus.Helpers.dominant_eigenvalue(A)
 
-        @test isapprox(λ_dom, 1.0, rtol = 1e-5)
+        @test isapprox(λ_dom, 1.0, rtol = 1.0e-5)
     end
 
     # Test 3: Diagonal matrix
@@ -30,8 +30,8 @@ using Test
         λ_dom = Daedalus.Helpers.dominant_eigenvalue(A)
         λ_exact = maximum(real(eigen(A).values))
 
-        @test isapprox(λ_dom, λ_exact, rtol = 1e-5)
-        @test isapprox(λ_dom, 5.0, rtol = 1e-5)
+        @test isapprox(λ_dom, λ_exact, rtol = 1.0e-5)
+        @test isapprox(λ_dom, 5.0, rtol = 1.0e-5)
     end
 
     # Test 4: Random matrix
@@ -41,7 +41,7 @@ using Test
         λ_dom = Daedalus.Helpers.dominant_eigenvalue(A)
         λ_exact = maximum(real(eigen(A).values))
 
-        @test isapprox(λ_dom, λ_exact, rtol = 1e-4)
+        @test isapprox(λ_dom, λ_exact, rtol = 1.0e-4)
     end
 
     # Test 5: Australia NGM (realistic use case)
@@ -71,10 +71,10 @@ using Test
         λ_exact = maximum(real(eigen(ngm).values))
 
         # Should match the exact eigenvalue
-        @test isapprox(λ_dom, λ_exact, rtol = 1e-4)
+        @test isapprox(λ_dom, λ_exact, rtol = 1.0e-4)
 
         # Should be approximately r0
-        @test isapprox(λ_dom, r0, rtol = 1e-2)
+        @test isapprox(λ_dom, r0, rtol = 1.0e-2)
     end
 
     # Test 6: Full contact matrix (49x49) with susceptible scaling
@@ -104,7 +104,7 @@ using Test
         λ_dom = Daedalus.Helpers.dominant_eigenvalue(ngm_susc)
         λ_exact = maximum(real(eigen(ngm_susc).values))
 
-        @test isapprox(λ_dom, λ_exact, rtol = 1e-4)
+        @test isapprox(λ_dom, λ_exact, rtol = 1.0e-4)
     end
 
     # Test 7: Convergence with different tolerances
@@ -112,13 +112,13 @@ using Test
         Random.seed!(456)
         A = rand(20, 20)
 
-        λ_tight = Daedalus.Helpers.dominant_eigenvalue(A, tol = 1e-8)
-        λ_loose = Daedalus.Helpers.dominant_eigenvalue(A, tol = 1e-3)
+        λ_tight = Daedalus.Helpers.dominant_eigenvalue(A, tol = 1.0e-8)
+        λ_loose = Daedalus.Helpers.dominant_eigenvalue(A, tol = 1.0e-3)
         λ_exact = maximum(real(eigen(A).values))
 
         # Both should be close to exact
-        @test isapprox(λ_tight, λ_exact, rtol = 1e-4)
-        @test isapprox(λ_loose, λ_exact, rtol = 1e-2)
+        @test isapprox(λ_tight, λ_exact, rtol = 1.0e-4)
+        @test isapprox(λ_loose, λ_exact, rtol = 1.0e-2)
 
         # Tight tolerance should be more accurate
         @test abs(λ_tight - λ_exact) <= abs(λ_loose - λ_exact)
@@ -139,11 +139,11 @@ using Test
         λ2 = Daedalus.Helpers.dominant_eigenvalue(A, v_init = v_init)
 
         # Both should give the same result
-        @test isapprox(λ1, λ2, rtol = 1e-5)
+        @test isapprox(λ1, λ2, rtol = 1.0e-5)
 
         # Both should match exact
         λ_exact = maximum(real(eigen(A).values))
-        @test isapprox(λ2, λ_exact, rtol = 1e-4)
+        @test isapprox(λ2, λ_exact, rtol = 1.0e-4)
     end
 
     # Test 9: Non-negative matrix (Perron-Frobenius property)
@@ -159,7 +159,7 @@ using Test
         @test λ_dom > 0
 
         # Should match exact value
-        @test isapprox(λ_dom, λ_exact, rtol = 1e-4)
+        @test isapprox(λ_dom, λ_exact, rtol = 1.0e-4)
     end
 
     # Test 10: Zero matrix edge case
@@ -167,7 +167,7 @@ using Test
         A = zeros(5, 5)
         λ_dom = Daedalus.Helpers.dominant_eigenvalue(A)
 
-        @test isapprox(λ_dom, 0.0, atol = 1e-10)
+        @test isapprox(λ_dom, 0.0, atol = 1.0e-10)
     end
 end
 
@@ -182,7 +182,7 @@ end
             time_end = 50.0,
             increment = 1.0,
             log_rt = true
-        );
+        )
 
         # Extract Rt values
         iRt = Daedalus.Constants.get_indices("Rt")
@@ -190,7 +190,7 @@ end
 
         # Check that Rt values are reasonable
         @test all(rt_values .> 0)  # Rt should be positive
-        @test rt_values[1]≈2.0 atol=0.1  # Initial Rt should be close to r0
+        @test rt_values[1] ≈ 2.0 atol = 0.1  # Initial Rt should be close to r0
 
         # Check that Rt decreases over time (as susceptibles are depleted)
         # This is expected behavior for an epidemic without interventions

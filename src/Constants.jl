@@ -3,10 +3,10 @@
 module Constants
 
 export iS, iE, iIs, iIa, iH, iR, iD, N_COMPARTMENTS, COMPARTMENTS,
-       i_AGE_GROUPS, i_WORKING_AGE, i_ECON_GROUPS,
-       N_AGE_GROUPS, N_ECON_GROUPS, N_TOTAL_GROUPS, N_VACCINE_STRATA,
-       i_UNVAX_STRATUM, i_VAX_STRATUM, i_rel_Rt, i_rel_Rt_cont,
-       get_indices
+    i_AGE_GROUPS, i_WORKING_AGE, i_ECON_GROUPS,
+    N_AGE_GROUPS, N_ECON_GROUPS, N_TOTAL_GROUPS, N_VACCINE_STRATA,
+    i_UNVAX_STRATUM, i_VAX_STRATUM, i_rel_Rt, i_rel_Rt_cont,
+    get_indices
 
 const iS = 1
 const iE = 2
@@ -70,7 +70,7 @@ passed, otherwise a `Vector{Int}`.
 function get_indices(
         compartment::String,
         groups::Union{Nothing, Int, AbstractVector{Int}, UnitRange{Int}} = nothing
-)
+    )
     if compartment == "Rt"
         return N_TOTAL_GROUPS * N_COMPARTMENTS * N_VACCINE_STRATA + i_rel_Rt
     end
