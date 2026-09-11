@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Migrated CI and maintenance automation to the shared SciML/.github reusable
+  workflows (grouped tests driven by `test/test_groups.toml`, Runic format
+  check, spell check, downgrade resolution, TagBot, dependabot auto-merge, doc
+  preview cleanup, documentation build).
+- Switched the test suite to SciMLTesting.jl folder discovery: each top-level
+  `test/*.jl` file runs as an isolated `@safetestset` in the `Core` group, and a
+  new `QA` group (`test/qa/`) runs Aqua, ExplicitImports, API-docs, reexport and
+  JET checks. `test_multi_runs.jl` is now actually executed (it was previously
+  never included in `runtests.jl`).
+- Formatted the codebase with Runic (replaces JuliaFormatter/`.JuliaFormatter.toml`).
+- Dependabot now manages Julia compat updates for `/`, `/docs` and `/test/qa`;
+  CompatHelper workflow removed.
+- Minimum Julia version is now 1.10 (required by OrdinaryDiffEq 6).
+
+### Fixed
+- `DataLoader.get_country`, `get_pathogen`, `get_closure_strategy`,
+  `get_sector_names` and `get_economic_contacts` now return copies of the
+  cached data. Previously they returned shared mutable objects, so mutating a
+  returned value (e.g. `infection.r0 = 2.5`) corrupted the cache for all later
+  calls in the same session.
+- Removed undefined exports `get_time`, `get_values` from `Daedalus` and
+  `get_coef` from `Daedalus.Events`; exported `get_values` and `get_times`
+  (which exist in `Daedalus.Outputs`) from the top level.
+- Made all imports from external packages explicit (ExplicitImports-clean) and
+  removed the unused `StaticArrays` dependency.
+- Replaced the random warm-start vector in `make_rt_logger` with a deterministic
+  unit vector, removing a reliance on `randn` being exported by `Base`
+  (only true on Julia >= 1.11).
+
 ## [0.0.10] - 20266-04-09
 
 ### Changed (Breaking)
@@ -70,7 +100,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.0.7] - 2026-03-19
 
-- Transfer repository to Jameel Institute @jameel-institute oragnisation
+- Transfer repository to Jameel Institute @jameel-institute organisation
 - Added small script `docs/sync_readme.jl` to update package version in website index and Readme.md
 
 ## [0.0.6] - 2026-03-16

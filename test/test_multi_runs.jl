@@ -25,7 +25,7 @@ using Test
         infections = [
             Daedalus.DataLoader.get_pathogen("sars-cov-2 delta"),
             Daedalus.DataLoader.get_pathogen("sars-cov-2 delta"),
-            Daedalus.DataLoader.get_pathogen("sars-cov-2 delta")
+            Daedalus.DataLoader.get_pathogen("sars-cov-2 delta"),
         ]
         infections[1].r0 = 1.0
         infections[2].r0 = 1.5
@@ -70,7 +70,7 @@ using Test
         # Different r0 values should produce different ODE solutions
         infections = [
             Daedalus.DataLoader.get_pathogen("sars-cov-2 delta"),
-            Daedalus.DataLoader.get_pathogen("sars-cov-2 delta")
+            Daedalus.DataLoader.get_pathogen("sars-cov-2 delta"),
         ]
         infections[1].r0 = 1.0
         infections[2].r0 = 3.0
@@ -92,7 +92,7 @@ using Test
         infections = [
             Daedalus.DataLoader.get_pathogen("sars-cov-2 delta"),
             Daedalus.DataLoader.get_pathogen("sars-cov-2 delta"),
-            Daedalus.DataLoader.get_pathogen("sars-cov-2 delta")
+            Daedalus.DataLoader.get_pathogen("sars-cov-2 delta"),
         ]
         infections[1].r0 = 1.0
         infections[2].r0 = 2.0
@@ -107,8 +107,10 @@ using Test
         expected_timepoints = Int(time_end / increment) + 1
 
         for result in results
-            # Check number of saved timepoints
-            @test length(result.sol.t) == expected_timepoints
+            # Check number of saved timepoints. The Rt-logging callback saves an
+            # extra post-affect state at each savepoint, so use `get_times`
+            # (unique timepoints) rather than `length(sol.t)`.
+            @test length(Daedalus.Outputs.get_times(result)) == expected_timepoints
         end
     end
 end
@@ -119,7 +121,7 @@ end
         infections = [
             Daedalus.DataLoader.get_pathogen("sars-cov-2 delta"),
             Daedalus.DataLoader.get_pathogen("sars-cov-2 delta"),
-            Daedalus.DataLoader.get_pathogen("sars-cov-2 delta")
+            Daedalus.DataLoader.get_pathogen("sars-cov-2 delta"),
         ]
         infections[1].r0 = 1.0
         infections[2].r0 = 1.5
@@ -142,7 +144,7 @@ end
         infections = [
             Daedalus.DataLoader.get_pathogen("sars-cov-2 delta"),
             Daedalus.DataLoader.get_pathogen("sars-cov-2 delta"),
-            Daedalus.DataLoader.get_pathogen("sars-cov-2 delta")
+            Daedalus.DataLoader.get_pathogen("sars-cov-2 delta"),
         ]
         infections[1].r0 = 1.0
         infections[2].r0 = 1.5
@@ -167,7 +169,7 @@ end
         infections_serial = [
             Daedalus.DataLoader.get_pathogen("sars-cov-2 delta"),
             Daedalus.DataLoader.get_pathogen("sars-cov-2 delta"),
-            Daedalus.DataLoader.get_pathogen("sars-cov-2 delta")
+            Daedalus.DataLoader.get_pathogen("sars-cov-2 delta"),
         ]
         infections_serial[1].r0 = 1.0
         infections_serial[2].r0 = 1.5
@@ -182,7 +184,7 @@ end
             infections_threaded = [
                 Daedalus.DataLoader.get_pathogen("sars-cov-2 delta"),
                 Daedalus.DataLoader.get_pathogen("sars-cov-2 delta"),
-                Daedalus.DataLoader.get_pathogen("sars-cov-2 delta")
+                Daedalus.DataLoader.get_pathogen("sars-cov-2 delta"),
             ]
             infections_threaded[1].r0 = 1.0
             infections_threaded[2].r0 = 1.5
@@ -246,7 +248,7 @@ end
         # Should handle very short simulation times
         infections = [
             Daedalus.DataLoader.get_pathogen("sars-cov-2 delta"),
-            Daedalus.DataLoader.get_pathogen("sars-cov-2 delta")
+            Daedalus.DataLoader.get_pathogen("sars-cov-2 delta"),
         ]
         infections[1].r0 = 1.0
         infections[2].r0 = 2.0
@@ -265,7 +267,7 @@ end
         infections_template = [
             Daedalus.DataLoader.get_pathogen("sars-cov-2 delta"),
             Daedalus.DataLoader.get_pathogen("sars-cov-2 delta"),
-            Daedalus.DataLoader.get_pathogen("sars-cov-2 delta")
+            Daedalus.DataLoader.get_pathogen("sars-cov-2 delta"),
         ]
 
         for country_name in countries
@@ -296,7 +298,7 @@ end
     @testset "Other parameters are shared across runs" begin
         infections = [
             Daedalus.DataLoader.get_pathogen("sars-cov-2 delta"),
-            Daedalus.DataLoader.get_pathogen("sars-cov-2 delta")
+            Daedalus.DataLoader.get_pathogen("sars-cov-2 delta"),
         ]
         infections[1].r0 = 1.0
         infections[2].r0 = 2.0
@@ -318,7 +320,7 @@ end
     @testset "Each solution has valid ODE output" begin
         infections = [
             Daedalus.DataLoader.get_pathogen("sars-cov-2 delta"),
-            Daedalus.DataLoader.get_pathogen("sars-cov-2 delta")
+            Daedalus.DataLoader.get_pathogen("sars-cov-2 delta"),
         ]
         infections[1].r0 = 1.0
         infections[2].r0 = 2.0
@@ -328,10 +330,8 @@ end
             sol = result.sol
 
             # Check solution structure
-            @test haskey(sol, :t)  # Time vector
-            @test haskey(sol, :u)  # State vector
-            @test !isempty(sol.t)
-            @test !isempty(sol.u)
+            @test !isempty(sol.t)  # Time vector
+            @test !isempty(sol.u)  # State vector
             @test length(sol.t) == length(sol.u)
 
             # State should be a vector
@@ -347,8 +347,8 @@ end
 
         state = results[1].sol.u[1]
         expected_dim = Daedalus.Constants.N_COMPARTMENTS *
-                       Daedalus.Constants.N_TOTAL_GROUPS *
-                       Daedalus.Constants.N_VACCINE_STRATA + 1
+            Daedalus.Constants.N_TOTAL_GROUPS *
+            Daedalus.Constants.N_VACCINE_STRATA + 1
 
         @test length(state) == expected_dim
     end

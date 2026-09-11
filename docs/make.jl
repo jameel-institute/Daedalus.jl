@@ -14,7 +14,7 @@ makedocs(;
         assets = String[],
         size_threshold_ignore = [
             "ensemble.md",
-            "country_data.md"  # prevent HTML size errors during docs build
+            "country_data.md",  # prevent HTML size errors during docs build
         ]
     ),
     checkdocs = :exports,
@@ -28,7 +28,7 @@ makedocs(;
         "Parallelisation" => "parallelisation.md",
         "Country and pathogen data" => "country_data.md",
         "Index" => "pkg_index.md",
-        "Function Reference" => "reference.md"
+        "Function Reference" => "reference.md",
     ]
 )
 

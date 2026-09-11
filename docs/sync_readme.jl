@@ -1,4 +1,3 @@
-
 using Daedalus # import for package version
 
 """
@@ -30,8 +29,10 @@ function sync_readme()
     content = read(src_file, String)
 
     # Insert version badge after the first badge line
-    content = replace(content,
-        r"(\n\[!\[Version\]\(.*?\)\]\(.*?\)\n)"s => "\n$badge\n")
+    content = replace(
+        content,
+        r"(\n\[!\[Version\]\(.*?\)\]\(.*?\)\n)"s => "\n$badge\n"
+    )
 
     # Update docs/src/index with correct version
     write(src_file, content)
@@ -43,13 +44,15 @@ function sync_readme()
     content = replace(content, r"```@example\s+\w+\n"s => "```julia\n")
 
     # Insert version badge after the first badge line
-    content = replace(content,
-        r"(\n\[!\[Version:.*?\]\(.*?\)\]\(.*?\)\n)"s => "\n$badge\n")
+    content = replace(
+        content,
+        r"(\n\[!\[Version:.*?\]\(.*?\)\]\(.*?\)\n)"s => "\n$badge\n"
+    )
 
     # Write to temporary file
     write(dest_file, content)
 
-    println("✓ Readme and index updated with version $version")
+    return println("✓ Readme and index updated with version $version")
 end
 
 sync_readme()

@@ -1,3 +1,6 @@
+using Daedalus
+using Test
+
 @testset "Outputs.get_values" begin
     infection = Daedalus.DataLoader.get_pathogen("sars-cov-2 delta")
     infection.r0 = 2.5

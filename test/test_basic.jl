@@ -1,3 +1,7 @@
+using Daedalus
+using LinearAlgebra
+using Test
+
 @testset "DAEDALUS model" begin
     try
         infection = Daedalus.DataLoader.get_pathogen("sars-cov-2 delta")
