@@ -1,4 +1,3 @@
-
 module Helpers
 
 export get_beta, get_ngm, sum_by_age, dominant_eigenvalue, weighted_slice_sum!
@@ -6,7 +5,7 @@ export get_beta, get_ngm, sum_by_age, dominant_eigenvalue, weighted_slice_sum!
 using ..Constants
 import ..DataLoader as DL
 
-using LinearAlgebra
+using LinearAlgebra: Diagonal, dot, eigen, mul!, norm
 
 """
     get_beta(cm, r0, sigma, p_sigma, epsilon, gamma_Ia, gamma_Is)::Union{Float64, Vector{Float64}}
@@ -29,9 +28,11 @@ the target basic reproduction number(s) R₀.
 - If `r0` is a scalar: returns a single `Float64` value for beta
 - If `r0` is a vector: returns a `Vector{Float64}` of beta values
 """
-function get_beta(cm::Matrix{Float64}, r0::Union{Float64, Vector{Float64}},
+function get_beta(
+        cm::Matrix{Float64}, r0::Union{Float64, Vector{Float64}},
         sigma::Float64, p_sigma::Float64, epsilon::Float64,
-        gamma_Ia::Float64, gamma_Is::Float64)::Union{Float64, Vector{Float64}}
+        gamma_Ia::Float64, gamma_Is::Float64
+    )::Union{Float64, Vector{Float64}}
     n_groups = size(cm)[1]
     sigma_1 = sigma * (1.0 - p_sigma)
     sigma_2 = sigma * p_sigma
@@ -44,15 +45,27 @@ function get_beta(cm::Matrix{Float64}, r0::Union{Float64, Vector{Float64}},
         foi_a, foi_s
     )
 
-    vvec = [repeat([sigma], n_groups);
-            repeat([gamma_Ia], n_groups);
-            repeat([gamma_Is], n_groups)]
+    vvec = [
+        repeat([sigma], n_groups);
+        repeat([gamma_Ia], n_groups);
+        repeat([gamma_Is], n_groups)
+    ]
 
     v_mat = Matrix(Diagonal(vvec))
-    v_mat[(1:n_groups) .+ n_groups, 1:n_groups] = Matrix(Diagonal(repeat(
-        [-sigma_1], n_groups)))
-    v_mat[(1:n_groups) .+ n_groups * 2, 1:n_groups] = Matrix(Diagonal(repeat(
-        [-sigma_2], n_groups)))
+    v_mat[(1:n_groups) .+ n_groups, 1:n_groups] = Matrix(
+        Diagonal(
+            repeat(
+                [-sigma_1], n_groups
+            )
+        )
+    )
+    v_mat[(1:n_groups) .+ n_groups * 2, 1:n_groups] = Matrix(
+        Diagonal(
+            repeat(
+                [-sigma_2], n_groups
+            )
+        )
+    )
 
     v_inv = inv(v_mat)
 
@@ -73,7 +86,7 @@ function get_beta(cm::Matrix{Float64}, infdata::DL.InfectionData)
     gamma_Ia = infdata.gamma_Ia
     gamma_Is = infdata.gamma_Is
 
-    get_beta(cm, r0, sigma, p_sigma, epsilon, gamma_Ia, gamma_Is)
+    return get_beta(cm, r0, sigma, p_sigma, epsilon, gamma_Ia, gamma_Is)
 end
 
 """
@@ -97,9 +110,11 @@ current susceptibility levels in the population.
 - If `beta` is a scalar: returns a single `Matrix{Float64}`
 - If `beta` is a vector: returns a `Vector{Matrix{Float64}}` of NGMs
 """
-function get_ngm(cm::Matrix{Float64}, beta::Float64,
+function get_ngm(
+        cm::Matrix{Float64}, beta::Float64,
         sigma::Float64, p_sigma::Float64, epsilon::Float64,
-        gamma_Ia::Float64, gamma_Is::Float64)::Matrix{Float64}
+        gamma_Ia::Float64, gamma_Is::Float64
+    )::Matrix{Float64}
     n_groups = size(cm)[1]
     sigma_1 = sigma * (1.0 - p_sigma)
     sigma_2 = sigma * p_sigma
@@ -112,15 +127,27 @@ function get_ngm(cm::Matrix{Float64}, beta::Float64,
         foi_a, foi_s
     )
 
-    vvec = [repeat([sigma], n_groups);
-            repeat([gamma_Ia], n_groups);
-            repeat([gamma_Is], n_groups)]
+    vvec = [
+        repeat([sigma], n_groups);
+        repeat([gamma_Ia], n_groups);
+        repeat([gamma_Is], n_groups)
+    ]
 
     v_mat = Matrix(Diagonal(vvec))
-    v_mat[(1:n_groups) .+ n_groups, 1:n_groups] = Matrix(Diagonal(repeat(
-        [-sigma_1], n_groups)))
-    v_mat[(1:n_groups) .+ n_groups * 2, 1:n_groups] = Matrix(Diagonal(repeat(
-        [-sigma_2], n_groups)))
+    v_mat[(1:n_groups) .+ n_groups, 1:n_groups] = Matrix(
+        Diagonal(
+            repeat(
+                [-sigma_1], n_groups
+            )
+        )
+    )
+    v_mat[(1:n_groups) .+ n_groups * 2, 1:n_groups] = Matrix(
+        Diagonal(
+            repeat(
+                [-sigma_2], n_groups
+            )
+        )
+    )
 
     v_inv = inv(v_mat)
 
@@ -134,12 +161,16 @@ end
 
 Vector-dispatch version: compute one NGM for each transmission rate in `beta`.
 """
-function get_ngm(cm::Matrix{Float64}, beta::Vector{Float64},
+function get_ngm(
+        cm::Matrix{Float64}, beta::Vector{Float64},
         sigma::Float64, p_sigma::Float64, epsilon::Float64,
-        gamma_Ia::Float64, gamma_Is::Float64)::Vector{Matrix{Float64}}
-    return [get_ngm(cm, beta_i, sigma, p_sigma, epsilon, gamma_Ia, gamma_Is)
+        gamma_Ia::Float64, gamma_Is::Float64
+    )::Vector{Matrix{Float64}}
+    return [
+        get_ngm(cm, beta_i, sigma, p_sigma, epsilon, gamma_Ia, gamma_Is)
             for
-            beta_i in beta]
+            beta_i in beta
+    ]
 end
 
 """
@@ -201,10 +232,12 @@ A = rand(49, 49)
 λ_dom = dominant_eigenvalue(A)
 ```
 """
-function dominant_eigenvalue(A::AbstractMatrix;
+function dominant_eigenvalue(
+        A::AbstractMatrix;
         v_init::Union{Nothing, AbstractVector} = nothing,
         max_iter::Int = 100,
-        tol::Float64 = 1e-6)
+        tol::Float64 = 1.0e-6
+    )
     n = size(A, 1)
 
     # Initialize with provided vector or random vector
@@ -281,7 +314,7 @@ BLAS `gemv` then computes the weighted sum in a single call.
 """
 function weighted_slice_sum!(X::Array{T, 3}, v::Vector{T}, result::Array{T, 2}) where {T}
     M, K, N = size(X)
-    mul!(vec(result), reshape(X, M * K, N), v)
+    return mul!(vec(result), reshape(X, M * K, N), v)
 end
 
 end

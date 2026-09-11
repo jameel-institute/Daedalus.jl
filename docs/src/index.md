@@ -8,7 +8,7 @@ CurrentModule = Daedalus
 [![Version](https://img.shields.io/badge/version-0.0.9-aquamarine.svg)](https://jameel-institute.github.io/Daedalus.jl/dev/)
 [![Project Status: Concept – Minimal or no implementation has been done yet, or the repository is only intended to be a limited example, demo, or proof-of-concept.](https://www.repostatus.org/badges/latest/concept.svg)](https://www.repostatus.org/#concept)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://jameel-institute.github.io/Daedalus.jl/dev/)
-[![Build Status](https://github.com/jameel-institute/Daedalus.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/jameel-institute/Daedalus.jl/actions/workflows/CI.yml?query=branch%3Amain)
+[![Build Status](https://github.com/jameel-institute/Daedalus.jl/actions/workflows/Tests.yml/badge.svg?branch=main)](https://github.com/jameel-institute/Daedalus.jl/actions/workflows/Tests.yml?query=branch%3Amain)
 [![Coverage](https://codecov.io/gh/jameel-institute/Daedalus.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/jameel-institute/Daedalus.jl)
 [![SciML Code Style](https://img.shields.io/static/v1?label=code%20style&message=SciML&color=9558b2&labelColor=389826)](https://github.com/SciML/SciMLStyle)
 

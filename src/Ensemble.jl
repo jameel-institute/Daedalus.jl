@@ -26,13 +26,15 @@ A `Vector{NamedTuple}` where each element contains:
 - `npi`: The NPI specification used
 - `r0`: The R0 value for this infection
 """
-function daedalus(country::Union{String, DataLoader.CountryData},
+function daedalus(
+        country::Union{String, DataLoader.CountryData},
         infections::Vector{DataLoader.InfectionData};
         npi::Union{Npi, Nothing} = nothing,
         log_rt::Bool = true,
         time_end::Float64 = 100.0,
         increment::Float64 = 1.0,
-        n_threads::Int = 1)
+        n_threads::Int = 1
+    )
 
     # Extract R0 values from infection list
     r0_values = [inf.r0 for inf in infections]
@@ -103,7 +105,8 @@ function daedalus(country::Union{String, DataLoader.CountryData},
 
     # Solve ensemble
     ensemble_solution = daedalus_internal(
-        length(r0_values), shared_data, param_sets, cb_set)
+        length(r0_values), shared_data, param_sets, cb_set
+    )
 
     # Format results: Vector of NamedTuples, one per r0
     results = []
@@ -116,8 +119,11 @@ function daedalus(country::Union{String, DataLoader.CountryData},
             nothing
         end
 
-        push!(results, (
-            sol = ensemble_solution[i], saves = saved_vals, npi = npi, r0 = r0_values[i]))
+        push!(
+            results, (
+                sol = ensemble_solution.u[i], saves = saved_vals, npi = npi, r0 = r0_values[i],
+            )
+        )
     end
 
     return results

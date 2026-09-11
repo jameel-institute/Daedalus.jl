@@ -1,3 +1,7 @@
+using Daedalus
+using Random
+using Test
+
 @testset "weighted_slice_sum!" begin
     wss! = Daedalus.Helpers.weighted_slice_sum!
 

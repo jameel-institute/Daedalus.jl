@@ -1,3 +1,6 @@
+using Daedalus
+using Test
+
 @testset "Zero-worker sector countries solve without warnings" begin
     # 30 countries have at least one sector with 0 workers in the data.
     # They previously emitted dt_NaN solver warnings because prepare_demog
@@ -7,12 +10,12 @@
         "Costa Rica", "Cyprus", "Estonia", "Finland", "Hong Kong", "Iceland",
         "Japan", "Kazakhstan", "Laos", "Latvia", "Luxembourg", "Malaysia",
         "Malta", "Mexico", "Morocco", "Myanmar", "New Zealand", "Portugal",
-        "Romania", "Rwanda", "Singapore", "Slovenia", "Switzerland", "Tunisia"
+        "Romania", "Rwanda", "Singapore", "Slovenia", "Switzerland", "Tunisia",
     ]
     for country in zero_worker_countries
         # prepare_demog must have no zeros (would cause Inf in contact scaling)
         demog = Daedalus.Data.prepare_demog(country)
-        @test all(demog .> 0) broken=false
+        @test all(demog .> 0) broken = false
 
         # Scaled contact matrix must be finite
         cm = Daedalus.Data.prepare_contacts(country; scaled = true)

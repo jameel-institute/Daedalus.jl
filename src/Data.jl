@@ -5,11 +5,11 @@ module Data
 
 using ..Constants
 using ..DataLoader
-using LinearAlgebra
+using LinearAlgebra: Diagonal
 
 export prepare_contacts, contacts3d, get_settings, total_contacts,
-       prepare_community_contacts, worker_contacts, consumer_worker_contacts,
-       prepare_demog, initial_state
+    prepare_community_contacts, worker_contacts, consumer_worker_contacts,
+    prepare_demog, initial_state
 
 """
     worker_contacts(workers; scaled=true)::Vector{Float64}
@@ -127,7 +127,7 @@ function prepare_demog(cd::CountryData)
 end
 
 """
-    worker_contacts(cd::CountryData; scaled=true) -> SVector
+    worker_contacts(cd::CountryData; scaled=true) -> Vector{Float64}
 
 Get per-capita social contacts within each economic sector using workforce
 counts from `cd`. Sectors with zero workers are treated as having 1 worker
@@ -221,9 +221,12 @@ the matrices are summed element-wise to produce the total contact matrix. When
 # Returns
 A single `Matrix{Float64}` representing total contacts across all settings.
 """
-function total_contacts(contacts::Union{
-        Vector{Matrix{Float64}}, Matrix{Float64}})::Matrix{Float64}
-    isa(contacts, Vector) ? sum(contacts) : contacts
+function total_contacts(
+        contacts::Union{
+            Vector{Matrix{Float64}}, Matrix{Float64},
+        }
+    )::Matrix{Float64}
+    return isa(contacts, Vector) ? sum(contacts) : contacts
 end
 
 """
@@ -272,7 +275,7 @@ Return the number of contact matrix settings (closure strategies) for a country.
 The number of contact matrix settings: typically 1 (single matrix) or >1 (multiple scenarios)
 """
 function get_settings(cd::CountryData)::Int
-    isa(cd.contact_matrix, Vector) ? length(cd.contact_matrix) : 1
+    return isa(cd.contact_matrix, Vector) ? length(cd.contact_matrix) : 1
 end
 
 """
@@ -306,7 +309,7 @@ function initial_state(cd::CountryData)
     demography = cd.demography
     workers = cd.workers .+ 1.0
 
-    p_infected = 1e-6
+    p_infected = 1.0e-6
     p_susc = 1.0 - p_infected
 
     zero_compartments = zeros(N_COMPARTMENTS - 3)
@@ -360,7 +363,7 @@ function prepare_community_contacts(country::String; scaled = true)
 end
 
 """
-    worker_contacts(country::String; scaled=true) -> SVector
+    worker_contacts(country::String; scaled=true) -> Vector{Float64}
 
 Get per-capita within-sector contact rates for a named country.
 """

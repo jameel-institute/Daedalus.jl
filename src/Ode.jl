@@ -1,13 +1,9 @@
-
 module Ode
 export daedalus_ode!
 
 using ..Constants
 using ..DaedalusStructs
 using ..Helpers
-
-using LinearAlgebra
-using StaticArrays
 
 """
     daedalus_ode!(du, u, p, t)
@@ -110,7 +106,7 @@ function daedalus_ode!(du::Array, u::Array, p::Params, t::Number)
 
     # change in recovered
     @. dR = (p.gamma_Ia * Ia) + (p.gamma_Is * Is) +
-            (p.gamma_H .* H) - (p.rho * R)
+        (p.gamma_H .* H) - (p.rho * R)
 
     @. dR[:, 1] += (-new_Rvax * nu_eff + new_Rwane * p.psi)
     @. dR[:, 2] += (new_Rvax * nu_eff - new_Rwane * p.psi)
@@ -119,7 +115,7 @@ function daedalus_ode!(du::Array, u::Array, p::Params, t::Number)
     @. dD = p.omega .* H
 
     # Rt is updated by callbacks; keep its derivative zero between updates
-    du[end] = 0.0
+    return du[end] = 0.0
 end
 
 end

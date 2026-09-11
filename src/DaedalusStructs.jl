@@ -1,9 +1,6 @@
-
 module DaedalusStructs
 
-using ..Constants
-
-using DiffEqCallbacks
+using DiffEqCallbacks: SavedValues
 
 export Params, Npi, Effect, ParamEffect, Trigger, ReactiveTrigger, TimeTrigger
 
@@ -126,9 +123,11 @@ mutable struct ParamEffect <: Effect
     saved_values::SavedValues
     ison::Bool
 
-    function ParamEffect(target::Symbol, func::Function,
+    function ParamEffect(
+            target::Symbol, func::Function,
             reset_func::Function,
-            trigger_on::Trigger, trigger_off::Trigger)
+            trigger_on::Trigger, trigger_off::Trigger
+        )
         sv = SavedValues(Float64, Tuple{Float64, Float64})
         return new(target, func, reset_func, trigger_on, trigger_off, sv, false)
     end

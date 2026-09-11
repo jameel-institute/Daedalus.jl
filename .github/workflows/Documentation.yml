@@ -1,0 +1,19 @@
+name: Documentation
+
+on:
+  push:
+    branches:
+      - main
+      - 'release-'
+    tags: ["*"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: "SciML/.github/.github/workflows/documentation.yml@v1"
+    with:
+      # The repo already deploys gh-pages with the DOCUMENTER_KEY deploy key
+      # (also used by TagBot); keep authenticating with it.
+      use-documenter-key: true
+    secrets: "inherit"

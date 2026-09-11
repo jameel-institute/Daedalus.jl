@@ -1,16 +1,14 @@
-
 module Events
 
 using ..Constants
 using ..DaedalusStructs
 using ..Helpers
 
-using DiffEqCallbacks: SavedValues, SavingCallback, PresetTimeCallback
-using LinearAlgebra: eigen, norm
-using OrdinaryDiffEq
+using DiffEqCallbacks: PresetTimeCallback, SavingCallback
+using SciMLBase: CallbackSet
 
 export make_events, make_param_changer, make_param_reset,
-       make_save_events, make_rt_logger, get_coef
+    make_save_events, make_rt_logger
 
 """
     make_param_changer(eff::Effect)::Function
@@ -32,12 +30,12 @@ function make_param_changer(eff::Effect)::Function
         effect! = function (integrator)
             original = getproperty(integrator.p, eff.target)
             new_val = eff.func(original)
-            setproperty!(integrator.p, eff.target, new_val)
+            return setproperty!(integrator.p, eff.target, new_val)
         end
         return effect!
     else
         effect! = function (integrator)
-            if length(eff.saved_values.saveval) > 0
+            return if length(eff.saved_values.saveval) > 0
                 value_on = eff.trigger_on.value
                 u = eff.saved_values.saveval[end][1] # index 1 for comp_on
                 if u > value_on && !eff.ison
@@ -74,13 +72,13 @@ function make_param_reset(eff::Effect)::Function
         effect! = function (integrator)
             current = getproperty(integrator.p, eff.target)
             reset_val = eff.reset_func(current)
-            setproperty!(integrator.p, eff.target, reset_val)
+            return setproperty!(integrator.p, eff.target, reset_val)
         end
 
         return effect!
     else
         effect! = function (integrator)
-            if length(eff.saved_values.saveval) > 0
+            return if length(eff.saved_values.saveval) > 0
                 value_off = eff.trigger_off.value
                 u = eff.saved_values.saveval[end][2] # index 2 for trigger_off
 
@@ -242,9 +240,11 @@ function make_rt_logger(savepoints)
     iRt = Constants.get_indices("Rt")
 
     # Preallocate initial vector for power iteration warm starts
-    # Using warm starts can improve convergence speed between timesteps
-    v_prev = randn(N_TOTAL_GROUPS)
-    v_prev = v_prev / norm(v_prev)
+    # Using warm starts can improve convergence speed between timesteps.
+    # A unit-normalised all-ones vector is guaranteed non-orthogonal to the
+    # dominant eigenvector since the susceptibility-adjusted NGM is non-negative
+    # (Perron eigenvector has positive entries).
+    v_prev = fill(1 / sqrt(N_TOTAL_GROUPS), N_TOTAL_GROUPS)
 
     idx_S = Constants.get_indices("S")
 
@@ -257,9 +257,10 @@ function make_rt_logger(savepoints)
         # Use power iteration to compute only the dominant eigenvalue
         # This is significantly faster than computing all eigenvalues
         rt = Helpers.dominant_eigenvalue(
-            ngm_susc, v_init = v_prev, max_iter = 100, tol = 1e-5)
+            ngm_susc, v_init = v_prev, max_iter = 100, tol = 1.0e-5
+        )
 
-        integrator.u[iRt] = rt # only logged here, use explicit index rather than end
+        return integrator.u[iRt] = rt # only logged here, use explicit index rather than end
     end
 
     pstcb_rt = PresetTimeCallback(savepoints, affect!)

@@ -1,3 +1,6 @@
+using Daedalus
+using Test
+
 @testset "Multiple contact settings" begin
     cd = Daedalus.DataLoader.get_country("Australia")
     cm = cd.contact_matrix
@@ -29,9 +32,11 @@
         cd2 = deepcopy(cd)
         cd2.contact_matrix = [cm, cm]
         single = Daedalus.Data.total_contacts(
-            Daedalus.Data.prepare_contacts(cd; scaled = false))
+            Daedalus.Data.prepare_contacts(cd; scaled = false)
+        )
         doubled = Daedalus.Data.total_contacts(
-            Daedalus.Data.prepare_contacts(cd2; scaled = false))
+            Daedalus.Data.prepare_contacts(cd2; scaled = false)
+        )
         @test doubled ≈ 2 .* single
     end
 
@@ -63,6 +68,6 @@
         result_2 = daedalus(cd2, infection_2, time_end = 300.0, log_rt = false)
         deaths_1 = last(Daedalus.Outputs.get_values(result_1, "D", 1))
         deaths_2 = last(Daedalus.Outputs.get_values(result_2, "D", 1))
-        @test deaths_2 ≈ deaths_1 rtol = 1e-3
+        @test deaths_2 ≈ deaths_1 rtol = 1.0e-3
     end
 end

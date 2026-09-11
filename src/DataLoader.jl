@@ -1,16 +1,15 @@
-
 module DataLoader
 
 export CountryData, InfectionData, VaccinationScenario, EconomicContacts,
-       get_country, list_countries,
-       get_pathogen, list_pathogens,
-       get_economic_contacts, get_sector_names,
-       get_vaccination_scenario, list_vaccination_scenarios,
-       get_closure_strategy, list_closure_strategies
+    get_country, list_countries,
+    get_pathogen, list_pathogens,
+    get_economic_contacts, get_sector_names,
+    get_vaccination_scenario, list_vaccination_scenarios,
+    get_closure_strategy, list_closure_strategies
 
-using CSV
-using DataFrames
-using Statistics
+using CSV: CSV
+using DataFrames: DataFrame, ncol, nrow, rename!
+using Statistics: mean
 
 const DATA_DIR = joinpath(@__DIR__, "data")
 
@@ -107,12 +106,15 @@ end
 
 Return within-sector and between-sector social contact rates for all 45
 economic sectors. Data sourced from `sectorcontacts.csv`.
+
+Returns a copy of the cached data so that mutating the result does not
+corrupt the cache.
 """
 function get_economic_contacts()::EconomicContacts
     if isnothing(_econ_cache[])
         _econ_cache[] = _load_economic_contacts()
     end
-    return _econ_cache[]
+    return deepcopy(_econ_cache[])
 end
 
 function _load_sector_names()
@@ -129,7 +131,7 @@ function get_sector_names()::Vector{String}
     if isnothing(_sectors_cache[])
         _sectors_cache[] = _load_sector_names()
     end
-    return _sectors_cache[]
+    return copy(_sectors_cache[])
 end
 
 # Age-bin groups for sevenpathogens.csv: 17 five-year bins (0-4, ..., 80+)
@@ -191,7 +193,7 @@ function _load_pathogens()
         eta = (ihr_4 ./ ps) ./ Tsh
 
         # hfr[age] = IFR[age] / IHR[age]  (clamp to avoid div-by-zero)
-        hfr = ifr_4 ./ max.(ihr_4, 1e-12)
+        hfr = ifr_4 ./ max.(ihr_4, 1.0e-12)
 
         result[lowercase(pname)] = InfectionData(
             r0, sigma, ps, epsilon,
@@ -208,6 +210,9 @@ end
 
 Return infection parameters for the named pathogen. Call [`list_pathogens`](@ref)
 to see available names.
+
+Returns a copy of the cached data so that mutating the result (e.g. setting
+`r0`) does not corrupt the cache for later calls.
 """
 function get_pathogen(name::String)::InfectionData
     if isnothing(_pathogen_cache[])
@@ -217,7 +222,7 @@ function get_pathogen(name::String)::InfectionData
     name_lower = lowercase(name)
     haskey(d, name_lower) ||
         error("Pathogen not found: $name. Available: " * join(keys(d), ", "))
-    return d[name_lower]
+    return deepcopy(d[name_lower])
 end
 
 """
@@ -233,10 +238,10 @@ function list_pathogens()::Vector{String}
 end
 
 const VACCINATION_SCENARIOS = Dict{String, VaccinationScenario}(
-    "none" => VaccinationScenario(365.0, 1.0 / 7 / 100, 0.40, 0.50, 270.0),
-    "low" => VaccinationScenario(300.0, 2.0 / 7 / 100, 0.50, 0.50, 270.0),
-    "medium" => VaccinationScenario(200.0, 3.0 / 7 / 100, 0.60, 0.50, 270.0),
-    "high" => VaccinationScenario(100.0, 3.5 / 7 / 100, 0.80, 0.50, 270.0)
+    "none" => VaccinationScenario(365.0, 1.0 / 7 / 100, 0.4, 0.5, 270.0),
+    "low" => VaccinationScenario(300.0, 2.0 / 7 / 100, 0.5, 0.5, 270.0),
+    "medium" => VaccinationScenario(200.0, 3.0 / 7 / 100, 0.6, 0.5, 270.0),
+    "high" => VaccinationScenario(100.0, 3.5 / 7 / 100, 0.8, 0.5, 270.0)
 )
 
 """
@@ -247,8 +252,10 @@ Return parameters for the named vaccination scenario. Call
 """
 function get_vaccination_scenario(name::String)::VaccinationScenario
     haskey(VACCINATION_SCENARIOS, name) ||
-        error("Scenario not found: $name. Available: " *
-              join(keys(VACCINATION_SCENARIOS), ", "))
+        error(
+        "Scenario not found: $name. Available: " *
+            join(keys(VACCINATION_SCENARIOS), ", ")
+    )
     return VACCINATION_SCENARIOS[name]
 end
 
@@ -292,7 +299,7 @@ function get_closure_strategy(name::String)::Vector{Float64}
     end
     d = _closure_cache[]
     haskey(d, name) || error("Strategy not found: $name. Available: " * join(keys(d), ", "))
-    return d[name]
+    return copy(d[name])
 end
 
 """
@@ -319,7 +326,7 @@ function _demog_bins_to_4(pop16::Vector{Float64})::Vector{Float64}
         pop16[1],
         sum(pop16[2:4]),
         sum(pop16[5:13]),
-        sum(pop16[14:16])
+        sum(pop16[14:16]),
     ]
 end
 
@@ -402,7 +409,7 @@ function _load_countries()
             pop21[1],
             sum(pop21[2:4]),
             sum(pop21[5:13]),
-            sum(pop21[14:21])
+            sum(pop21[14:21]),
         ]
 
         # --- Workers: 45 sectors ---
@@ -448,6 +455,9 @@ end
 
 Return demographic and economic data for the named country. Call
 [`list_countries`](@ref) to see available countries.
+
+Returns a copy of the cached data so that mutating the result does not
+corrupt the cache for later calls.
 """
 function get_country(name::String)::CountryData
     if isnothing(_country_cache[])
@@ -456,7 +466,7 @@ function get_country(name::String)::CountryData
     d = _country_cache[]
     haskey(d, name) ||
         error("Country \"$name\" not found. Call list_countries() to see available names.")
-    return d[name]
+    return deepcopy(d[name])
 end
 
 """

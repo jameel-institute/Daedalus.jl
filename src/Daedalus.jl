@@ -1,6 +1,5 @@
 module Daedalus
 
-# Write your package code here.
 include("Constants.jl")
 include("DaedalusStructs.jl")
 include("DataLoader.jl")
@@ -12,6 +11,8 @@ include("Model.jl")
 include("Ensemble.jl")
 include("Outputs.jl")
 
-export Npi, ParamEffect, ReactiveTrigger, TimeTrigger, get_values, get_time
+using .Outputs: get_times, get_values
+
+export Npi, ParamEffect, ReactiveTrigger, TimeTrigger, get_values, get_times
 
 end

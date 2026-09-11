@@ -1,7 +1,6 @@
 using Daedalus
 using Test
 using OrdinaryDiffEq
-using DiffEqCallbacks
 
 @testset "ParamEffect with reactive triggers" begin
     @testset "Construct ParamEffect with ReactiveTrigger" begin
